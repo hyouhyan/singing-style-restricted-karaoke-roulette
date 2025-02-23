@@ -51,7 +51,7 @@
             roulette.innerHTML = "";
 
             // ルーレットにアイテムを複数回追加してループ感を演出
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 15; i++) {
                 const randomItem = items[Math.floor(Math.random() * items.length)];
                 const div = document.createElement("div");
                 div.className = "roulette-item";
@@ -63,7 +63,7 @@
             let position = 0;
             const itemHeight = 80;
             const totalItems = roulette.children.length;
-            const spinDuration = 3000;
+            const spinDuration = 1000;
             const startTime = performance.now();
 
             function animate(time) {
