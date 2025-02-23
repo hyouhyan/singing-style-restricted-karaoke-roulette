@@ -30,27 +30,98 @@
             font-size: 2rem;
             border-bottom: 1px solid #ddd;
         }
+
+        .item-list li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        #settings-panel {
+            display: none;
+            margin-bottom: 1rem;
+        }
+
+        #settingsBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: #4B5563;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
 <body class="flex flex-col items-center justify-center h-screen bg-gray-100 ms-2">
     <h1 class="text-3xl font-bold mb-6 text-center">歌い方縛りカラオケルーレット</h1>
+
+    <button id="settingsBtn">⚙️</button>
+
+    <div id="settings-panel">
+        <div class="mb-4">
+            <input id="newItem" type="text" placeholder="新しい項目を追加" class="border px-3 py-2 rounded-md">
+            <button id="addItemBtn" class="px-4 py-2 bg-green-500 text-white rounded-md ml-2">追加</button>
+        </div>
+
+        <ul id="itemList" class="item-list mb-4"></ul>
+    </div>
+
     <div id="roulette-container" class="mb-6">
         <div id="roulette"></div>
     </div>
-    <button id="startBtn"
-        class="px-6 py-3 bg-blue-500 text-white rounded-xl shadow hover:bg-blue-600 transition">スタート</button>
+    <button id="startBtn" class="px-6 py-3 bg-blue-500 text-white rounded-xl shadow hover:bg-blue-600 transition">スタート</button>
 
     <script>
-        const items = ["しゃくり", "超巻き舌", "フォール", "オペラ", "セリフっぽく", "エッチなお姉さん", "音痴", "しゃっくり", "おめがリオ", "こぶし", "がなり(Ado風)", "ビブラート"];
+        let items = ["しゃくり", "超巻き舌", "フォール", "オペラ", "セリフっぽく", "エッチなお姉さん", "音痴", "しゃっくり", "おめがリオ", "こぶし", "がなり(Ado風)", "ビブラート"];
         const roulette = document.getElementById("roulette");
         const startBtn = document.getElementById("startBtn");
+        const newItemInput = document.getElementById("newItem");
+        const addItemBtn = document.getElementById("addItemBtn");
+        const itemList = document.getElementById("itemList");
+        const settingsBtn = document.getElementById("settingsBtn");
+        const settingsPanel = document.getElementById("settings-panel");
+
+        function renderItemList() {
+            itemList.innerHTML = "";
+            items.forEach((item, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `${item} <button class='bg-red-500 text-white px-2 py-1 rounded-md ml-2' onclick='removeItem(${index})'>削除</button>`;
+                itemList.appendChild(li);
+            });
+        }
+
+        function removeItem(index) {
+            items.splice(index, 1);
+            renderItemList();
+        }
+
+        addItemBtn.addEventListener("click", () => {
+            const newItem = newItemInput.value.trim();
+            if (newItem) {
+                items.push(newItem);
+                newItemInput.value = "";
+                renderItemList();
+            }
+        });
+
+        settingsBtn.addEventListener("click", () => {
+            settingsPanel.style.display = settingsPanel.style.display === "none" ? "block" : "none";
+        });
 
         startBtn.addEventListener("click", () => {
+            if (items.length === 0) return alert("少なくとも1つの項目を追加してください。");
+
             startBtn.disabled = true;
             roulette.innerHTML = "";
 
-            // ルーレットにアイテムを複数回追加してループ感を演出
             for (let i = 0; i < 15; i++) {
                 const randomItem = items[Math.floor(Math.random() * items.length)];
                 const div = document.createElement("div");
@@ -59,7 +130,6 @@
                 roulette.appendChild(div);
             }
 
-            // アニメーション制御
             let position = 0;
             const itemHeight = 80;
             const totalItems = roulette.children.length;
@@ -69,36 +139,30 @@
             function animate(time) {
                 const elapsed = time - startTime;
                 const progress = Math.min(elapsed / spinDuration, 1);
-
-                // イージング関数で減速効果
                 const easeOut = 1 - Math.pow(1 - progress, 3);
                 const maxScroll = (totalItems - 1) * itemHeight;
                 position = easeOut * maxScroll;
-
                 roulette.style.top = `-${position}px`;
 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // アニメーション終了後に選択されたアイテムを表示
-                    const finalIndex = Math.min(Math.round(position / itemHeight), totalItems - 1);
+                    const finalIndex = Math.min(Math.floor(position / itemHeight), totalItems - 1);
                     const finalItem = roulette.children[finalIndex];
-
                     roulette.innerHTML = "";
                     const resultDiv = document.createElement("div");
                     resultDiv.className = "roulette-item text-red-500 font-bold text-3xl";
                     resultDiv.textContent = finalItem.textContent;
                     roulette.appendChild(resultDiv);
-
-                    // styleのtopを削除
                     roulette.style.top = "";
-
                     startBtn.disabled = false;
                 }
             }
 
             requestAnimationFrame(animate);
         });
+
+        renderItemList();
     </script>
 </body>
 
