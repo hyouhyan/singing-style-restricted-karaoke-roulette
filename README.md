@@ -1,1 +1,1 @@
-# singing-style-restricted-karaoke-roulette
+# 歌い方縛りカラオケルーレット(singing-style-restricted-karaoke-roulette)
